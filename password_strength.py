@@ -15,12 +15,14 @@ def check_password():
     if password == "":
         messagebox.showwarning("Warning", "Please Enter a Password.")
         return
-    
+
     length = len(password)
     has_upper = any(c.isupper() for c in password)
     has_lower = any(c.islower() for c in password)
     has_digit = any(c.isdigit() for c in password)
-    has_special = any(c in "!@#$%^&*()-+_+{}[]|/,.`~;:'?<>" for c in password)
+
+    special_chars = "!@#$%^&*()-_+=[]{}|\\:;\"'<>,.?/~`"
+    has_special = any(c in special_chars for c in password)
 
     score = 0
 
@@ -34,37 +36,45 @@ def check_password():
         score += 1
     if has_special:
         score += 1
-    
+
+    # Dynamic Suggestions
+    suggestions = []
+
+    if length < 8:
+        suggestions.append("• Use at least 8 characters.")
+    if not has_upper:
+        suggestions.append("• Add uppercase letters.")
+    if not has_lower:
+        suggestions.append("• Add lowercase letters.")
+    if not has_digit:
+        suggestions.append("• Add numbers.")
+    if not has_special:
+        suggestions.append("• Add special characters.")
+
     if score <= 2:
-        strength = "WEAK🔴"
+        strength = "WEAK 🔴"
         color = "red"
-        suggestion = (
-            "• Use at least 8 characters.\n"
-            "• Add uppercase characters.\n"
-            "• Add lowercase characters.\n"
-            "• Add numbers.\n"
-            "• Add special characters."
-        )
 
     elif score <= 4:
-        strength = "Medium🟠"
+        strength = "MEDIUM 🟠"
         color = "dark orange"
-        suggestion = (
-            "✔ Good password.\n"
-            "✔ Add a number to make it stronger."
-        )
 
     else:
-        strength = "Strong🟢"
+        strength = "STRONG 🟢"
         color = "green"
-        suggestion = (
-    "✔ Excellent!\n"
-    "✔ Your password is strong.\n"
-    "✔ It follows recommended security practices."
-)
-        
+
+    if score == 5:
+        suggestion_text = (
+            "✔ Excellent!\n"
+            "✔ Your password is strong.\n"
+            "✔ It follows recommended security practices."
+        )
+    else:
+        suggestion_text = "\n".join(suggestions)
+
     result_label.config(
-        text = f"""Password Analysis
+        text=f"""Password Analysis
+
 Length              : {length}
 Uppercase           : {'Yes' if has_upper else 'No'}
 Lowercase           : {'Yes' if has_lower else 'No'}
@@ -73,9 +83,10 @@ Special Characters  : {'Yes' if has_special else 'No'}
 
 Password Strength   : {strength}
 
-Suggestions         : {suggestion}
+Suggestions:
+{suggestion_text}
 """,
-        fg = color
+        fg=color
     )
 
 # ======================================
